@@ -14,6 +14,9 @@ pids
 # Env
 .env
 
+# Config
+config.json
+
 # Dist
 dist/
 

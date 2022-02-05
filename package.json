@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "main": "node index.js",
+    "dev": "nodemon -r dotenv/config index.js"
   },
   "repository": {
     "type": "git",
@@ -18,9 +22,12 @@
   },
   "homepage": "https://github.com/firko-learnin/JoshyB-tracker#readme",
   "dependencies": {
-    "discord.js": "^13.6.0"
+    "discord.js": "^13.6.0",
+    "node-fetch": "^3.2.0"
   },
   "devDependencies": {
-    "eslint": "^8.8.0"
+    "dotenv": "^16.0.0",
+    "eslint": "^8.8.0",
+    "nodemon": "^2.0.15"
   }
 }
