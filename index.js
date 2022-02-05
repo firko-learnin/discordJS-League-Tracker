@@ -1,5 +1,5 @@
 // Import server for replit
-import keepAlive from "./server";
+import keepAlive from "./server.js";
 
 // Import the necessary discord.js classes
 import { Client, Intents } from "discord.js";
@@ -113,7 +113,7 @@ async function getLastGameStats() {
     return;
   } else {
     //Determine whether game was a win or loss using matches API
-    const matchData = await fetchMatchByMatchID(CACHE.gameID);
+    const matchData = await fetchMatchByMatchID(CACHE.lastGameID);
     if (matchData === undefined) {
       return;
     } else {
@@ -145,4 +145,4 @@ async function getLastGameStats() {
   }
 }
 
-setInterval(endGame, 30000);
+setInterval(getLastGameStats, 30000);
