@@ -1,3 +1,6 @@
+// Import server for replit
+import keepAlive from "./server";
+
 // Import the necessary discord.js classes
 import { Client, Intents } from "discord.js";
 
@@ -30,6 +33,9 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 client.once("ready", () => {
   console.log("Ready!");
 });
+
+// Call keep alive function to host on replit
+keepAlive();
 
 // Login to Discord with your client's token
 client.login(TOKEN);
