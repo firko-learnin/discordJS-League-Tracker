@@ -8,7 +8,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "main": "node index.js",
-    "dev": "nodemon -r dotenv/config index.js"
+    "dev": "nodemon -r dotenv/config index.js",
+    "db:createTable": "node -r dotenv/config ./db/scripts/createTable.js",
+    "db:readTable": "node -r dotenv/config ./db/scripts/readTable.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,8 @@
   "homepage": "https://github.com/firko-learnin/JoshyB-tracker#readme",
   "dependencies": {
     "discord.js": "^13.6.0",
-    "node-fetch": "^3.2.0"
+    "node-fetch": "^3.2.0",
+    "pg": "^8.7.3"
   },
   "devDependencies": {
     "dotenv": "^16.0.0",

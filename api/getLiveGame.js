@@ -14,7 +14,6 @@ export default async function getLiveGame(id) {
       }
     );
     const response = await request.json();
-    console.log(response);
     return response;
   };
   const result = await data();

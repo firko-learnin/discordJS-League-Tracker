@@ -1,11 +1,11 @@
 const APIKEY = process.env.APIKEY;
-const USERNAME = process.env.USERNAME;
 import fetch from "node-fetch";
 
-export default async function getID() {
+export default async function fetchMatchByMatchID(id) {
+  id = `EUW1_` + id;
   const data = async function () {
     const request = await fetch(
-      `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${USERNAME}`,
+      `https://europe.api.riotgames.com/lol/match/v5/matches/${id}`,
       {
         method: "GET",
         headers: {
@@ -15,14 +15,8 @@ export default async function getID() {
       }
     );
     const response = await request.json();
-    const newCache = {
-      username: USERNAME,
-      id: response.id,
-    };
-    return newCache;
+    return response;
   };
   const result = await data();
-  // res.status(200).json(result);
-  //Returns Summoner's encrypted ID (not PUUID)
-  return result;
+  return result.info;
 }
