@@ -46,6 +46,7 @@ export default async function printStats(liveStats, channel) {
     championImage: champData.champIcon,
   };
   console.log(data);
+  ç;
   channel.send({
     content: `${data.intro}
     Game mode: ${data.gameMode}
