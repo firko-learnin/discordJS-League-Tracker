@@ -12,9 +12,6 @@ import getLiveGame from "./api/getLiveGame.js";
 import printStats from "./botCommands/printStats.js";
 import fetchMatchByMatchID from "./api/fetchMatchByMatchID.js";
 
-//Import dummy data
-import { LIVESTATS } from "./data.js";
-
 // Declare const variables
 const TOKEN = process.env.TOKEN;
 const USERNAME = process.env.USERNAME;
@@ -23,6 +20,7 @@ let channel = undefined;
 let CACHE = {
   username: USERNAME,
   id: undefined,
+  lastGameID: undefined,
 };
 
 // Create a new client instance
@@ -72,7 +70,6 @@ async function checkIfInGame() {
       CACHE = { ...CACHE, gameID: liveStats.gameId };
       //Check if the games ID is already in the pg tableLayout
       const check = await checkGameExists(CACHE.gameID);
-      console.log(check);
       // If data is not in table length is 0
       if (check.length === 0) {
         //Post game ID to table for future loops
@@ -93,12 +90,27 @@ async function endGame() {
   const checkGameEnded = await getLiveGame(CACHE.id);
   // If the game is over status is 404 - truthy
   if (checkGameEnded.status) {
+    console.log("Game ended");
+    inGame = false;
+    let last = CACHE.gameID;
+    CACHE = { ...CACHE, gameID: undefined, lastGameID: last };
+  } else {
+    console.log("Game still going");
+    return null;
+  }
+}
+
+setInterval(endGame, 5000);
+
+async function getLastGameStats() {
+  if (CACHE.lastGameID === undefined) {
+    return;
+  } else {
     //Determine whether game was a win or loss using matches API
-    if (CACHE.gameID !== undefined) {
-      const matchData = await fetchMatchByMatchID(CACHE.gameID);
-      if (matchData === undefined) {
-        return;
-      }
+    const matchData = await fetchMatchByMatchID(CACHE.gameID);
+    if (matchData === undefined) {
+      return;
+    } else {
       // Find the index of the participant
       const index = await matchData.participants.findIndex(
         (participant) => participant.summonerName === CACHE.username
@@ -122,13 +134,9 @@ async function endGame() {
       channel.send(
         `Game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: /${matchData.participants[index].assists} \nKDA:${KDA}`
       );
-      inGame = false;
-      CACHE = { ...CACHE, gameID: undefined };
+      CACHE = { ...CACHE, lastGameID: undefined };
     }
-  } else {
-    console.log("Game still going");
-    return null;
   }
 }
 
-setInterval(endGame, 5000);
+setInterval(endGame, 30000);

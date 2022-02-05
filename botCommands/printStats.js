@@ -1,9 +1,6 @@
-import { LIVESTATS, POSTGAME } from "../data.js";
 import fetch from "node-fetch";
 
 const USERNAME = process.env.USERNAME;
-
-const postGame = POSTGAME;
 
 //Get latest champion data
 const champions = async () => {
