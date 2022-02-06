@@ -74,12 +74,12 @@ async function checkIfInGame() {
       inGame = false;
       return null;
     } else {
-      //If not in table set inGame to true
-      inGame = true;
       //Check if the games ID is already in the pg tableLayout
       const check = await checkGameExists(liveStats.gameId);
       // If data is not in table length is 0
       if (check.length === 0) {
+        //If not in table set inGame to true
+        inGame = true;
         //Store game ID in "cache"
         CACHE = { ...CACHE, gameID: liveStats.gameId };
         //Post game ID to table for future loops

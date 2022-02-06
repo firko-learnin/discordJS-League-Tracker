@@ -9,10 +9,3 @@ export default async function updateWL(username, gameid, WL) {
   console.log("done");
   console.log({ data });
 }
-
-export async function checkGameExists(gameid) {
-  console.log("Game ID below:");
-  console.log(gameid);
-  const data = await query("SELECT * from games WHERE gameid = $1", [gameid]);
-  return data.rows;
-}
