@@ -19,7 +19,7 @@ import fetchMatchByMatchID from "./api/fetchMatchByMatchID.js";
 const TOKEN = process.env.TOKEN;
 const USERNAME = process.env.USERNAME;
 let inGame = false;
-let channel = undefined;
+let channels = undefined;
 let CACHE = {
   username: USERNAME,
   id: undefined,
@@ -42,8 +42,11 @@ client.login(TOKEN);
 
 //Find the relevant channel
 client.once("ready", function getChannel() {
-  const data = client.channels.cache.get("939514944276295720");
-  channel = data;
+  const data = [
+    client.channels.cache.get("939296773934030900"),
+    client.channels.cache.get("939514944276295720"),
+  ];
+  channels = data;
   return data;
 });
 
@@ -61,6 +64,8 @@ async function populateID() {
 setInterval(populateID, 5000);
 
 async function checkIfInGame() {
+  console.log("User data currently: ");
+  console.log({ CACHE });
   //If encrypted id has not yet been located stop this function
   if (CACHE.id === undefined) return;
   //Check if player is in a game only if status is not in a game
@@ -72,16 +77,18 @@ async function checkIfInGame() {
     } else {
       //If not in table set inGame to true
       inGame = true;
-      //Store game ID in "cache"
-      CACHE = { ...CACHE, gameID: liveStats.gameId };
       //Check if the games ID is already in the pg tableLayout
-      const check = await checkGameExists(CACHE.gameID);
+      const check = await checkGameExists(liveStats.gameId);
+      console.log("Check is:");
+      console.log(check);
       // If data is not in table length is 0
       if (check.length === 0) {
+        //Store game ID in "cache"
+        CACHE = { ...CACHE, gameID: liveStats.gameId };
         //Post game ID to table for future loops
         addGame(CACHE.username, CACHE.gameID);
         //Post message in Discord
-        printStats(liveStats, channel);
+        printStats(liveStats, channels);
       }
       return null;
     }
@@ -97,9 +104,10 @@ async function endGame() {
   // If the game is over status is 404 - truthy
   if (checkGameEnded.status) {
     console.log("Game ended");
-    inGame = false;
     let last = CACHE.gameID;
     CACHE = { ...CACHE, gameID: undefined, lastGameID: last };
+    CACHE = { ...CACHE, lastGameID: last };
+    inGame = false;
   } else {
     console.log("Game still going");
     return null;
@@ -117,11 +125,11 @@ async function getLastGameStats() {
     if (matchData === undefined) {
       return;
     } else {
+      console.log(`Trying to get last game stats, game ID ${CACHE.lastGameID}`);
       // Find the index of the participant
       const index = await matchData.participants.findIndex(
         (participant) => participant.summonerName === CACHE.username
       );
-      console.log({ index });
       // Determine whether that participant won
       let result = "";
       if (matchData.participants[index].win === true) {
@@ -137,8 +145,10 @@ async function getLastGameStats() {
           matchData.participants[index].assists) /
         matchData.participants[index].deaths;
       KDA = Math.round(KDA * 100) / 100;
-      channel.send(
-        `Game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: /${matchData.participants[index].assists} \nKDA:${KDA}`
+      channels.forEach((channel) =>
+        channel.send(
+          `Game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA}`
+        )
       );
       CACHE = { ...CACHE, lastGameID: undefined };
     }

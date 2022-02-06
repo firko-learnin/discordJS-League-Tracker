@@ -33,7 +33,7 @@ async function findChamp(liveStats, index) {
 }
 
 //Message to send on Discord
-export default async function printStats(liveStats, channel) {
+export default async function printStats(liveStats, channels) {
   const index = findUser(liveStats);
   const champData = await findChamp(liveStats, index);
   const data = {
@@ -42,13 +42,15 @@ export default async function printStats(liveStats, channel) {
     championName: champData.champName,
     championImage: champData.champIcon,
   };
-  channel.send({
-    content: `${data.intro} \nGame mode: ${data.gameMode} \nChampion: ${data.championName}`,
-    files: [
-      {
-        attachment: data.championImage,
-      },
-    ],
-  });
+  channels.forEach((channel) =>
+    channel.send({
+      content: `${data.intro} \nGame mode: ${data.gameMode} \nChampion: ${data.championName}`,
+      files: [
+        {
+          attachment: data.championImage,
+        },
+      ],
+    })
+  );
   return data;
 }
