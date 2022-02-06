@@ -10,7 +10,8 @@
     "main": "node index.js",
     "dev": "nodemon -r dotenv/config index.js",
     "db:createTable": "node -r dotenv/config ./db/scripts/createTable.js",
-    "db:readTable": "node -r dotenv/config ./db/scripts/readTable.js"
+    "db:readTable": "node -r dotenv/config ./db/scripts/readTable.js",
+    "db:update": "node -r dotenv/config ./db/queries/updateWL.js"
   },
   "repository": {
     "type": "git",

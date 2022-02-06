@@ -138,16 +138,20 @@ async function getLastGameStats() {
         result = "L";
       }
       // Update table with W/L
-      updateWL(CACHE.username, CACHE.gameID, result);
+      updateWL(CACHE.username, CACHE.lastGameID, result);
       // Determine KDA
       let KDA =
         (matchData.participants[index].kills +
           matchData.participants[index].assists) /
         matchData.participants[index].deaths;
       KDA = Math.round(KDA * 100) / 100;
+      let duration = matchData.gameDuration;
+      if (duration > 3000) {
+        duration += " OOF it's a 50 minute banger!";
+      }
       channels.forEach((channel) =>
         channel.send(
-          `Game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA}`
+          `Game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
         )
       );
       CACHE = { ...CACHE, lastGameID: undefined };

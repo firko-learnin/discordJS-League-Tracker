@@ -3,6 +3,8 @@ import fetch from "node-fetch";
 
 export default async function fetchMatchByMatchID(id) {
   id = `EUW1_` + id;
+  console.log(id);
+  console.log(APIKEY);
   const data = async function () {
     const request = await fetch(
       `https://europe.api.riotgames.com/lol/match/v5/matches/${id}`,
