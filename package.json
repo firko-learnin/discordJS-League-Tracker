@@ -12,7 +12,8 @@
     "db:createTable": "node -r dotenv/config ./db/scripts/createTable.js",
     "db:readTable": "node -r dotenv/config ./db/scripts/readTable.js",
     "db:update": "node -r dotenv/config ./db/queries/updateWL.js",
-    "deployCommands": "node -r dotenv/config ./botCommands/deployCommands.js"
+    "deployCommands": "node -r dotenv/config ./botCommands/deployCommands.js",
+    "db:clearTable": "node -r dotenv/config ./db/scripts/clearTable.js"
   },
   "repository": {
     "type": "git",

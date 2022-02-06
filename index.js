@@ -83,8 +83,8 @@ async function populateID() {
 setInterval(populateID, 5000);
 
 async function checkIfInGame() {
+  console.log("Checking if players are in a game...");
   CACHE.forEach(async function (user, index) {
-    console.log(`Checking if ${user.username} is in a game...`);
     //If encrypted id has not yet been located stop this function
     if (user.id === undefined) return;
     //Check if player is in a game only if status is not in a game
@@ -105,7 +105,6 @@ async function checkIfInGame() {
           //Post game ID to table for future loops
           addGame(user.username, CACHE[index].gameID);
           //Post message in Discord
-          console.log(`${user.username} is in a game:`);
           printStats(user.username, liveStats, channels);
         }
         return null;
@@ -114,7 +113,7 @@ async function checkIfInGame() {
   });
 }
 
-//Run above function every 15 seconds
+//Run above function every 16 seconds
 setInterval(checkIfInGame, 16000);
 
 async function endGame() {
@@ -123,8 +122,10 @@ async function endGame() {
     const checkGameEnded = await getLiveGame(user.id);
     // If the game is over status is 404 - truthy
     if (checkGameEnded.status) {
-      let last = user.gameID;
-      CACHE[index] = { ...CACHE[index], gameID: undefined, lastGameID: last };
+      if (user.gameId !== undefined) {
+        let last = user.gameID;
+        CACHE[index] = { ...CACHE[index], gameID: undefined, lastGameID: last };
+      }
       CACHE[index] = { ...CACHE[index], inGame: false };
     } else {
       return null;
