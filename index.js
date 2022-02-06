@@ -161,55 +161,6 @@ async function endGame() {
 
 setInterval(endGame, 12000);
 
-// async function getLastGameStats() {
-//   USERS.forEach(async function (user, userIndex) {
-//     if (user.lastGameID === undefined) {
-//       return;
-//     } else {
-//       console.log(`Trying to get last game data for ${user.username}`);
-//       //Determine whether game was a win or loss using matches API
-//       const matchData = await fetchMatchByMatchID(user.lastGameID);
-//       if (matchData === undefined) {
-//         console.log(
-//           `Last game stats for ${user.username} not yet found on Riot API, game ID ${user.lastGameID}`
-//         );
-//         return;
-//       } else {
-//         console.log(`Found last game stats! Game ID ${user.lastGameID}`);
-//         // Find the index of the participant
-//         const index = await matchData.participants.findIndex(
-//           (participant) => participant.summonerName === user.username
-//         );
-//         // Determine whether that participant won
-//         let result = "";
-//         if (matchData.participants[index].win === true) {
-//           result = "W";
-//         } else {
-//           result = "L";
-//         }
-//         // Update table with W/L
-//         updateWL(user.username, user.lastGameID, result);
-//         // Determine KDA
-//         let KDA =
-//           (matchData.participants[index].kills +
-//             matchData.participants[index].assists) /
-//           matchData.participants[index].deaths;
-//         KDA = Math.round(KDA * 100) / 100;
-//         let duration = matchData.gameDuration;
-//         if (duration > 3000) {
-//           duration += " OOF it's a 50 minute banger!";
-//         }
-//         channels.forEach((channel) =>
-//           channel.send(
-//             `${user.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
-//           )
-//         );
-//         CACHE[userIndex] = { ...CACHE[userIndex], lastGameID: undefined };
-//       }
-//     }
-//   });
-// }
-
 //Rewrite last game stats using all empty entries in PG table
 
 async function getLastGameStats() {
