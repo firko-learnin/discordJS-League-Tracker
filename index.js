@@ -64,8 +64,7 @@ async function populateID() {
 setInterval(populateID, 5000);
 
 async function checkIfInGame() {
-  console.log("User data currently: ");
-  console.log({ CACHE });
+  console.log("Checking if player is in a game...");
   //If encrypted id has not yet been located stop this function
   if (CACHE.id === undefined) return;
   //Check if player is in a game only if status is not in a game
@@ -79,8 +78,6 @@ async function checkIfInGame() {
       inGame = true;
       //Check if the games ID is already in the pg tableLayout
       const check = await checkGameExists(liveStats.gameId);
-      console.log("Check is:");
-      console.log(check);
       // If data is not in table length is 0
       if (check.length === 0) {
         //Store game ID in "cache"
@@ -109,7 +106,7 @@ async function endGame() {
     CACHE = { ...CACHE, lastGameID: last };
     inGame = false;
   } else {
-    console.log("Game still going");
+    console.log("Game is still going...");
     return null;
   }
 }
@@ -123,9 +120,12 @@ async function getLastGameStats() {
     //Determine whether game was a win or loss using matches API
     const matchData = await fetchMatchByMatchID(CACHE.lastGameID);
     if (matchData === undefined) {
+      console.log(
+        `Last game not yet found on Riot API, game ID ${CACHE.lastGameID}`
+      );
       return;
     } else {
-      console.log(`Trying to get last game stats, game ID ${CACHE.lastGameID}`);
+      console.log(`Found last game stats! Game ID ${CACHE.lastGameID}`);
       // Find the index of the participant
       const index = await matchData.participants.findIndex(
         (participant) => participant.summonerName === CACHE.username
