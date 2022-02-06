@@ -151,7 +151,7 @@ async function getLastGameStats() {
       }
       channels.forEach((channel) =>
         channel.send(
-          `Game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
+          `${CACHE.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
         )
       );
       CACHE = { ...CACHE, lastGameID: undefined };
