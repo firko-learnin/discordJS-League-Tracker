@@ -83,13 +83,15 @@ async function populateID() {
       const newCACHE = await getID(user);
       CACHE[index] = { ...CACHE[index], ...newCACHE };
       console.log(`Played id found and saved for ${user.username}!`);
+      console.log(CACHE[index]);
+      return;
     } else {
       return;
     }
   });
 }
 
-setInterval(populateID, 8000);
+populateID();
 
 async function checkIfInGame() {
   console.log("Checking if players are in a game...");
