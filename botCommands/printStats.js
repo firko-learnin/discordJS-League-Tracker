@@ -1,7 +1,5 @@
 import fetch from "node-fetch";
 
-const USERNAME = process.env.USERNAME;
-
 //Get latest champion data
 const champions = async () => {
   const req = await fetch(
@@ -12,7 +10,7 @@ const champions = async () => {
 };
 
 //Find user in game
-function findUser(liveStats) {
+function findUser(liveStats, USERNAME) {
   const index = liveStats.participants.findIndex(
     (participant) => participant.summonerName === USERNAME
   );
@@ -33,8 +31,8 @@ async function findChamp(liveStats, index) {
 }
 
 //Message to send on Discord
-export default async function printStats(liveStats, channels) {
-  const index = findUser(liveStats);
+export default async function printStats(USERNAME, liveStats, channels) {
+  const index = findUser(liveStats, USERNAME);
   const champData = await findChamp(liveStats, index);
   const data = {
     intro: `${liveStats.participants[index].summonerName} has entered a game!`,

@@ -1,11 +1,10 @@
 const APIKEY = process.env.APIKEY;
-const USERNAME = process.env.USERNAME;
 import fetch from "node-fetch";
 
-export default async function getID() {
+export default async function getID(user) {
   const data = async function () {
     const request = await fetch(
-      `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${USERNAME}`,
+      `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${user.username}`,
       {
         method: "GET",
         headers: {
@@ -16,7 +15,7 @@ export default async function getID() {
     );
     const response = await request.json();
     const newCache = {
-      username: USERNAME,
+      username: user.username,
       id: response.id,
     };
     return newCache;

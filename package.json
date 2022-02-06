@@ -11,7 +11,8 @@
     "dev": "nodemon -r dotenv/config index.js",
     "db:createTable": "node -r dotenv/config ./db/scripts/createTable.js",
     "db:readTable": "node -r dotenv/config ./db/scripts/readTable.js",
-    "db:update": "node -r dotenv/config ./db/queries/updateWL.js"
+    "db:update": "node -r dotenv/config ./db/queries/updateWL.js",
+    "deployCommands": "node -r dotenv/config ./botCommands/deployCommands.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,9 @@
   },
   "homepage": "https://github.com/firko-learnin/JoshyB-tracker#readme",
   "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/rest": "^0.3.0",
+    "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
     "express": "^4.17.2",
     "node-fetch": "^3.2.0",
