@@ -8,6 +8,7 @@ import { Client, Intents } from "discord.js";
 import addGame from "./db/queries/addGame.js";
 import checkGameExists from "./db/queries/checkGameExists.js";
 import updateWL from "./db/queries/updateWL.js";
+import unresolvedGames from "./db/scripts/unresolvedGames.js";
 
 //Import functions
 import getID from "./api/getID.js";
@@ -24,6 +25,7 @@ const USERS = [
   "Oscrob",
   "Santeniett",
   "Stableyd",
+  "Rhythmicon",
 ];
 // let inGame = false;
 let channels = undefined;
@@ -101,21 +103,26 @@ async function checkIfInGame() {
       if (liveStats.status) {
         return null;
       } else {
-        //Logic if user is in a game
-        //Set inGame to true
-        CACHE[index] = { ...CACHE[index], inGame: true };
-        //Store game ID in "cache"
-        CACHE[index] = { ...CACHE[index], gameID: liveStats.gameId };
-        //Check if the game ID is already in the pg tableLayout
-        const check = await checkGameExists(liveStats.gameId);
-        // If data is not in table length is 0
-        if (check.length === 0) {
-          //Post game ID to table
-          addGame(user.username, CACHE[index].gameID);
-          //Post message in Discord
-          printStats(user.username, liveStats, channels);
+        //Prevent custom games from being added to PG table as they never get win/loss stats
+        if (liveStats.gameType === "CUSTOM_GAME") {
+          return null;
+        } else {
+          //Logic if user is in a game
+          //Set inGame to true
+          CACHE[index] = { ...CACHE[index], inGame: true };
+          //Store game ID in "cache"
+          CACHE[index] = { ...CACHE[index], gameID: liveStats.gameId };
+          //Check if the game ID is already in the pg tableLayout
+          const check = await checkGameExists(liveStats.gameId);
+          // If data is not in table length is 0
+          if (check.length === 0) {
+            //Post game ID to table
+            addGame(user.username, CACHE[index].gameID);
+            //Post message in Discord
+            printStats(user.username, liveStats, channels);
+          }
+          return null;
         }
-        return null;
       }
     }
   });
@@ -154,24 +161,79 @@ async function endGame() {
 
 setInterval(endGame, 12000);
 
+// async function getLastGameStats() {
+//   USERS.forEach(async function (user, userIndex) {
+//     if (user.lastGameID === undefined) {
+//       return;
+//     } else {
+//       console.log(`Trying to get last game data for ${user.username}`);
+//       //Determine whether game was a win or loss using matches API
+//       const matchData = await fetchMatchByMatchID(user.lastGameID);
+//       if (matchData === undefined) {
+//         console.log(
+//           `Last game stats for ${user.username} not yet found on Riot API, game ID ${user.lastGameID}`
+//         );
+//         return;
+//       } else {
+//         console.log(`Found last game stats! Game ID ${user.lastGameID}`);
+//         // Find the index of the participant
+//         const index = await matchData.participants.findIndex(
+//           (participant) => participant.summonerName === user.username
+//         );
+//         // Determine whether that participant won
+//         let result = "";
+//         if (matchData.participants[index].win === true) {
+//           result = "W";
+//         } else {
+//           result = "L";
+//         }
+//         // Update table with W/L
+//         updateWL(user.username, user.lastGameID, result);
+//         // Determine KDA
+//         let KDA =
+//           (matchData.participants[index].kills +
+//             matchData.participants[index].assists) /
+//           matchData.participants[index].deaths;
+//         KDA = Math.round(KDA * 100) / 100;
+//         let duration = matchData.gameDuration;
+//         if (duration > 3000) {
+//           duration += " OOF it's a 50 minute banger!";
+//         }
+//         channels.forEach((channel) =>
+//           channel.send(
+//             `${user.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
+//           )
+//         );
+//         CACHE[userIndex] = { ...CACHE[userIndex], lastGameID: undefined };
+//       }
+//     }
+//   });
+// }
+
+//Rewrite last game stats using all empty entries in PG table
+
 async function getLastGameStats() {
-  USERS.forEach(async function (user, userIndex) {
-    if (user.lastGameID === undefined) {
-      return;
+  const games = await unresolvedGames();
+  games.forEach(async function (game) {
+    //Check if unresolved game matches any games in progress and break look if true
+    if (CACHE.some((user) => user.gameID === game.gameid)) {
+      console.log(
+        `${game.gameid} is still in progress, stopping stats lookup.`
+      );
     } else {
-      console.log(`Trying to get last game data for ${user.username}`);
-      //Determine whether game was a win or loss using matches API
-      const matchData = await fetchMatchByMatchID(user.lastGameID);
+      const matchData = await fetchMatchByMatchID(game.gameid);
       if (matchData === undefined) {
         console.log(
-          `Last game stats for ${user.username} not yet found on Riot API, game ID ${user.lastGameID}`
+          `Last game stats for ${game.username} not yet found on Riot API, game ID ${game.gameid}`
         );
         return;
       } else {
-        console.log(`Found last game stats! Game ID ${user.lastGameID}`);
+        console.log(
+          `Found last game stats for ${game.username}'s last game! Game ID ${game.gameid}`
+        );
         // Find the index of the participant
         const index = await matchData.participants.findIndex(
-          (participant) => participant.summonerName === user.username
+          (participant) => participant.summonerName === game.username
         );
         // Determine whether that participant won
         let result = "";
@@ -181,23 +243,22 @@ async function getLastGameStats() {
           result = "L";
         }
         // Update table with W/L
-        updateWL(user.username, user.lastGameID, result);
+        updateWL(game.username, game.gameid, result);
         // Determine KDA
         let KDA =
           (matchData.participants[index].kills +
             matchData.participants[index].assists) /
           matchData.participants[index].deaths;
         KDA = Math.round(KDA * 100) / 100;
-        let duration = matchData.gameDuration;
+        let duration = matchData.gameDuration / 60 + "minutes";
         if (duration > 3000) {
           duration += " OOF it's a 50 minute banger!";
         }
         channels.forEach((channel) =>
           channel.send(
-            `${user.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
+            `${game.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
           )
         );
-        CACHE[userIndex] = { ...CACHE[userIndex], lastGameID: undefined };
       }
     }
   });

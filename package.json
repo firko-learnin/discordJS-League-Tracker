@@ -13,7 +13,8 @@
     "db:readTable": "node -r dotenv/config ./db/scripts/readTable.js",
     "db:update": "node -r dotenv/config ./db/queries/updateWL.js",
     "deployCommands": "node -r dotenv/config ./botCommands/deployCommands.js",
-    "db:clearTable": "node -r dotenv/config ./db/scripts/clearTable.js"
+    "db:clearTable": "node -r dotenv/config ./db/scripts/clearTable.js",
+    "db:unresolvedGames": "node -r dotenv/config ./db/scripts/unresolvedGames.js"
   },
   "repository": {
     "type": "git",
