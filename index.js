@@ -17,7 +17,14 @@ import fetchMatchByMatchID from "./api/fetchMatchByMatchID.js";
 
 // Declare const variables
 const TOKEN = process.env.TOKEN;
-const USERS = ["Ron Swanson", "FionnODO", "Wesleý", "Oscrob", "Santeniett"];
+const USERS = [
+  "Ron Swanson",
+  "FionnODO",
+  "Wesleý",
+  "Oscrob",
+  "Santeniett",
+  "Stableyd",
+];
 // let inGame = false;
 let channels = undefined;
 let CACHE = USERS.map((user) => ({
@@ -80,7 +87,7 @@ async function populateID() {
   });
 }
 
-setInterval(populateID, 5000);
+setInterval(populateID, 8000);
 
 async function checkIfInGame() {
   console.log("Checking if players are in a game...");
@@ -90,19 +97,20 @@ async function checkIfInGame() {
     //Check if player is in a game only if status is not in a game
     if (user.inGame === false) {
       const liveStats = await getLiveGame(user.id);
+      //Logic if no live game returned
       if (liveStats.status) {
-        CACHE[index] = { ...CACHE[index], inGame: false };
         return null;
       } else {
-        //Check if the games ID is already in the pg tableLayout
+        //Logic if user is in a game
+        //Set inGame to true
+        CACHE[index] = { ...CACHE[index], inGame: true };
+        //Store game ID in "cache"
+        CACHE[index] = { ...CACHE[index], gameID: liveStats.gameId };
+        //Check if the game ID is already in the pg tableLayout
         const check = await checkGameExists(liveStats.gameId);
         // If data is not in table length is 0
         if (check.length === 0) {
-          //If not in table set inGame to true
-          CACHE[index] = { ...CACHE[index], inGame: true };
-          //Store game ID in "cache"
-          CACHE[index] = { ...CACHE[index], gameID: liveStats.gameId };
-          //Post game ID to table for future loops
+          //Post game ID to table
           addGame(user.username, CACHE[index].gameID);
           //Post message in Discord
           printStats(user.username, liveStats, channels);
@@ -118,33 +126,45 @@ setInterval(checkIfInGame, 16000);
 
 async function endGame() {
   USERS.forEach(async function (user, index) {
-    if (user.inGame === false) return;
-    const checkGameEnded = await getLiveGame(user.id);
-    // If the game is over status is 404 - truthy
-    if (checkGameEnded.status) {
-      if (user.gameId !== undefined) {
-        let last = user.gameID;
-        CACHE[index] = { ...CACHE[index], gameID: undefined, lastGameID: last };
-      }
-      CACHE[index] = { ...CACHE[index], inGame: false };
+    if (user.inGame === false || user.id === undefined) {
+      return;
     } else {
-      return null;
+      const checkGameEnded = await getLiveGame(user.id);
+      // If the game is over status is 404 - truthy
+      if (checkGameEnded.status) {
+        console.log(
+          `${user.username}'s game has ended, game ID was ${user.gameID}, updating last game ID`
+        );
+        if (user.gameId !== undefined) {
+          let last = user.gameID;
+          CACHE[index] = {
+            ...CACHE[index],
+            gameID: undefined,
+            lastGameID: last,
+          };
+          console.log(`Set ${user.username}'s last game ID`);
+        }
+        CACHE[index] = { ...CACHE[index], inGame: false };
+      } else {
+        return null;
+      }
     }
   });
 }
 
-setInterval(endGame, 5000);
+setInterval(endGame, 12000);
 
 async function getLastGameStats() {
-  USERS.forEach(async function (user, index) {
+  USERS.forEach(async function (user, userIndex) {
     if (user.lastGameID === undefined) {
       return;
     } else {
+      console.log(`Trying to get last game data for ${user.username}`);
       //Determine whether game was a win or loss using matches API
       const matchData = await fetchMatchByMatchID(user.lastGameID);
       if (matchData === undefined) {
         console.log(
-          `Last game not yet found on Riot API, game ID ${user.lastGameID}`
+          `Last game stats for ${user.username} not yet found on Riot API, game ID ${user.lastGameID}`
         );
         return;
       } else {
@@ -177,7 +197,7 @@ async function getLastGameStats() {
             `${user.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
           )
         );
-        CACHE[index] = { ...CACHE[index], lastGameID: undefined };
+        CACHE[userIndex] = { ...CACHE[userIndex], lastGameID: undefined };
       }
     }
   });
