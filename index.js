@@ -20,12 +20,13 @@ import fetchMatchByMatchID from "./api/fetchMatchByMatchID.js";
 const TOKEN = process.env.TOKEN;
 const USERS = [
   "Ron Swanson",
-  "FionnODO",
   "Wesleý",
   "Oscrob",
   "Santeniett",
-  "Stableyd",
+  "FionnODO",
   "RhythmiCon",
+  "Craig W",
+  "Stableyd",
 ];
 // let inGame = false;
 let channels = undefined;
@@ -90,6 +91,7 @@ async function populateID() {
       return;
     }
   });
+  return;
 }
 
 populateID();
@@ -107,6 +109,7 @@ async function checkIfInGame() {
       const liveStats = await getLiveGame(user.id);
       //Logic if no live game returned
       if (liveStats.status) {
+        console.log(`${user.username} is not currently in a game`);
         CACHE[index] = { ...CACHE[index], inGame: false };
         if (liveStats.status.status_code === 403) {
           console.log("API key expired, please regenerate and update");
@@ -137,10 +140,11 @@ async function checkIfInGame() {
       }
     }
   });
+  return;
 }
 
-//Run above function every 16 seconds
-setInterval(checkIfInGame, 16000);
+//Run above function every 20 seconds
+setInterval(checkIfInGame, 20000);
 
 async function endGame() {
   USERS.forEach(async function (user, index) {
@@ -168,16 +172,16 @@ async function endGame() {
       }
     }
   });
+  return;
 }
 
-setInterval(endGame, 12000);
+setInterval(endGame, 20000);
 
 //Rewrite last game stats using all empty entries in PG table
 
 async function getLastGameStats() {
   console.log("Looking for unresolved games in the PG table");
   const games = await unresolvedGames();
-  console.log(games);
   games.forEach(async function (game) {
     console.log(`Trying to get last game stats for ${game.gameid}`);
     //Check if unresolved game matches any games in progress and break look if true
@@ -227,9 +231,14 @@ async function getLastGameStats() {
             `${game.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA: ${KDA} \nDuration: ${duration}`
           )
         );
+        if (game.username === "Stableyd" && result === "L") {
+          let joshyBChannel = client.channels.cache.get("939514944276295720");
+          joshyBChannel.send("@everyone ANOTHER L FOR JOSHYB!");
+        }
       }
     }
   });
+  return;
 }
 
 setInterval(getLastGameStats, 29000);
