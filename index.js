@@ -185,15 +185,9 @@ async function getLastGameStats() {
           `Found last game stats for ${game.username}'s last game! Game ID ${game.gameid}`
         );
         // Find the index of the participant
-        const index = await matchData.participants.findIndex(function find(
-          participant,
-          index
-        ) {
-          console.log(participant.summonerName);
-          if (participant.summonerName === game.username) {
-            return index;
-          }
-        });
+        const index = await matchData.participants.findIndex(
+          (participant) => participant.summonerName === game.username
+        );
         // Determine whether that participant won
         let result = "";
         if (matchData.participants[index].win === true) {
@@ -223,4 +217,4 @@ async function getLastGameStats() {
   });
 }
 
-setInterval(getLastGameStats, 5000);
+setInterval(getLastGameStats, 30000);
