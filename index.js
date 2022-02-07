@@ -76,6 +76,8 @@ client.once("ready", function getChannel() {
   return data;
 });
 
+// Check API key is still valid
+
 // Get key if not exists
 async function populateID() {
   CACHE.forEach(async function (user, index) {
@@ -103,7 +105,11 @@ async function checkIfInGame() {
       const liveStats = await getLiveGame(user.id);
       //Logic if no live game returned
       if (liveStats.status) {
-        return null;
+        if (checkGameEnded.status.status_code === 403) {
+          console.log("API key expired, please regenerate and update");
+        } else {
+          return null;
+        }
       } else {
         //Prevent custom games from being added to PG table as they never get win/loss stats
         if (liveStats.gameType === "CUSTOM_GAME") {
