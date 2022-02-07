@@ -25,7 +25,7 @@ const USERS = [
   "Oscrob",
   "Santeniett",
   "Stableyd",
-  "Rhythmicon",
+  "RhythmiCon",
 ];
 // let inGame = false;
 let channels = undefined;
@@ -185,9 +185,15 @@ async function getLastGameStats() {
           `Found last game stats for ${game.username}'s last game! Game ID ${game.gameid}`
         );
         // Find the index of the participant
-        const index = await matchData.participants.findIndex(
-          (participant) => participant.summonerName === game.username
-        );
+        const index = await matchData.participants.findIndex(function find(
+          participant,
+          index
+        ) {
+          console.log(participant.summonerName);
+          if (participant.summonerName === game.username) {
+            return index;
+          }
+        });
         // Determine whether that participant won
         let result = "";
         if (matchData.participants[index].win === true) {
@@ -203,7 +209,7 @@ async function getLastGameStats() {
             matchData.participants[index].assists) /
           matchData.participants[index].deaths;
         KDA = Math.round(KDA * 100) / 100;
-        let duration = matchData.gameDuration / 60 + "minutes";
+        let duration = matchData.gameDuration / 60 + " minutes";
         if (duration > 3000) {
           duration += " OOF it's a 50 minute banger!";
         }
@@ -217,4 +223,4 @@ async function getLastGameStats() {
   });
 }
 
-setInterval(getLastGameStats, 30000);
+setInterval(getLastGameStats, 5000);
