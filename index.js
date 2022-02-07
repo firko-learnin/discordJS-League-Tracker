@@ -107,6 +107,7 @@ async function checkIfInGame() {
       const liveStats = await getLiveGame(user.id);
       //Logic if no live game returned
       if (liveStats.status) {
+        CACHE[index] = { ...CACHE[index], inGame: false };
         if (liveStats.status.status_code === 403) {
           console.log("API key expired, please regenerate and update");
         } else {
@@ -174,8 +175,11 @@ setInterval(endGame, 12000);
 //Rewrite last game stats using all empty entries in PG table
 
 async function getLastGameStats() {
+  console.log("Looking for unresolved games in the PG table");
   const games = await unresolvedGames();
+  console.log(games);
   games.forEach(async function (game) {
+    console.log(`Trying to get last game stats for ${game.gameid}`);
     //Check if unresolved game matches any games in progress and break look if true
     if (CACHE.some((user) => user.gameID === game.gameid)) {
       console.log(
@@ -228,4 +232,4 @@ async function getLastGameStats() {
   });
 }
 
-setInterval(getLastGameStats, 30000);
+setInterval(getLastGameStats, 29000);
