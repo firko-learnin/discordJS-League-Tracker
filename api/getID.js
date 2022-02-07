@@ -23,5 +23,8 @@ export default async function getID(user) {
   const result = await data();
   // res.status(200).json(result);
   //Returns Summoner's encrypted ID (not PUUID)
+  if (result.id === undefined) {
+    console.log("API key may have expired, check and regen if necessary");
+  }
   return result;
 }

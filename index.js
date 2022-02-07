@@ -85,7 +85,6 @@ async function populateID() {
       const newCACHE = await getID(user);
       CACHE[index] = { ...CACHE[index], ...newCACHE };
       console.log(`Played id found and saved for ${user.username}!`);
-      console.log(CACHE[index]);
       return;
     } else {
       return;
@@ -99,13 +98,16 @@ async function checkIfInGame() {
   console.log("Checking if players are in a game...");
   CACHE.forEach(async function (user, index) {
     //If encrypted id has not yet been located stop this function
-    if (user.id === undefined) return;
+    if (user.id === undefined) {
+      console.log("User id is undefined, API key may need regenerating");
+      return;
+    }
     //Check if player is in a game only if status is not in a game
     if (user.inGame === false) {
       const liveStats = await getLiveGame(user.id);
       //Logic if no live game returned
       if (liveStats.status) {
-        if (checkGameEnded.status.status_code === 403) {
+        if (liveStats.status.status_code === 403) {
           console.log("API key expired, please regenerate and update");
         } else {
           return null;
@@ -210,12 +212,15 @@ async function getLastGameStats() {
           matchData.participants[index].deaths;
         KDA = Math.round(KDA * 100) / 100;
         let duration = matchData.gameDuration / 60 + " minutes";
+        if (KDA === Infinity) {
+          KDA = "Perfect!";
+        }
         if (duration > 3000) {
           duration += " OOF it's a 50 minute banger!";
         }
         channels.forEach((channel) =>
           channel.send(
-            `${game.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA:${KDA} \nDuration: ${duration}`
+            `${game.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA: ${KDA} \nDuration: ${duration}`
           )
         );
       }
