@@ -2,8 +2,8 @@
 
 A WIP DiscordJS bot created to track game winrate with your friends, messaging the preset channel IDs when a player:
 
-- Enters a game, including the selected champion, icon and mode
-- Finishes a game, including outcome, KDA ratio and game duration
+- Enters a game - including the selected champion, icon and mode
+- Finishes a game - including outcome, KDA ratio and game duration
 
 This bot was built using:
 - Node.js: https://nodejs.org/en/
