@@ -18,17 +18,8 @@ import fetchMatchByMatchID from "./api/fetchMatchByMatchID.js";
 
 // Declare const variables
 const TOKEN = process.env.TOKEN;
-const USERS = [
-  "Ron Swanson",
-  "Wesleý",
-  "Oscrob",
-  "Santeniett",
-  "FionnODO",
-  "RhythmiCon",
-  "Craig W",
-  "Stableyd",
-];
-// let inGame = false;
+const USERS = ["MagiFelix5"]; //List of users to track , separated
+
 let channels = undefined;
 let CACHE = USERS.map((user) => ({
   username: user,
@@ -70,8 +61,8 @@ client.login(TOKEN);
 //Find the relevant channel
 client.once("ready", function getChannel() {
   const data = [
-    client.channels.cache.get("939296773934030900"),
-    client.channels.cache.get("939514944276295720"),
+    client.channels.cache.get("939296773934030900"), //Discord channel IDs to post to
+    client.channels.cache.get("939514944276295720"), //Discord channel IDs to post to
   ];
   channels = data;
   return data;
@@ -231,9 +222,10 @@ async function getLastGameStats() {
             `${game.username}'s game ended, it's a ${result}! \nKills: ${matchData.participants[index].kills} \nDeaths: ${matchData.participants[index].deaths} \nAssists: ${matchData.participants[index].assists} \nKDA: ${KDA} \nDuration: ${duration}`
           )
         );
-        if (game.username === "Stableyd" && result === "L") {
-          let joshyBChannel = client.channels.cache.get("939514944276295720");
-          joshyBChannel.send("@everyone ANOTHER L FOR JOSHYB!");
+        //Example custom alert
+        if (game.username === "MagiFelix5" && result === "W") {
+          let channelToAlert = client.channels.cache.get("939514944276295720");
+          channelToAlert.send("@everyone MagiFelix5 does it again!");
         }
       }
     }
